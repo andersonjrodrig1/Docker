@@ -13,10 +13,6 @@ services:
     volumes:
       - ./../../db/volumes/mysql:/var/lib/mysql
     command: ["--default-authentication-plugin=mysql_native_password"]
-    profiles:
-      - mysql
-      - db
-      - all
 
   mssql:
     container_name: mssql-server
@@ -30,70 +26,55 @@ services:
       - 1433:1433
     volumes:
       - ./../../db/volumes/mssql:/var/opt/mssql/data
-    profiles:
-      - mssql
-      - db
-      - all
   
-  mongodb:
-    container_name: mongodb
+  mongo:
+    container_name: mongo
     image: mongo
-    restart: unless-stopped
+    restart: always
     environment:
-      MONGO_INITDB_DATABASE: example
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
       - ./../../db/volumes/mongodb:/data/db
-    networks:
-      - compose-network-bridge
-    profiles:
-      - mongodb
-      - db
-      - all
 
-  mongo-client:
-    container_name: mongo-client
+  mongoclient:
+    container_name: mongoclient
     image: mongoclient/mongoclient:latest
-    restart: unless-stopped
+    restart: always
     ports:
-      - 3000:3000
-    networks:
-      - compose-network-bridge
-    depends_on:
-      - mongodb
-    profiles:
-      - mongoclient
-      - client
-      - all
-
-  mongo-express:
-    container_name: mongo-express
-    image: mongo-express
-    restart: unless-stopped
-    ports:
-      - 8081:8081
+      - "3000:3000"
     environment:
-      ME_CONFIG_BASICAUTH_USERNAME: express
-      ME_CONFIG_BASICAUTH_PASSWORD: express
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: root
-      # ME_CONFIG_MONGODB_URL: mongodb://root:root@mongodb:27017/example?authSource=admin
-    networks:
-      - compose-network-bridge
-    links:
-      - mongodb
+      MONGO_URL: mongodb://root:root@mongo:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-256
+      MONGO_DATABASE: example
+      STARTUP_DELAY: 30
     depends_on:
-      - mongodb
-    profiles:
-      - mongoexpress
-      - client
-      - all
+      - mongo
+    networks:
+      - mongo-network
+
+  # mongo-express:
+  #   container_name: mongo-express
+  #   image: mongo-express
+  #   restart: unless-stopped
+  #   ports:
+  #     - 8081:8081
+  #   environment:
+  #     ME_CONFIG_BASICAUTH_USERNAME: express
+  #     ME_CONFIG_BASICAUTH_PASSWORD: express
+  #     ME_CONFIG_MONGODB_PORT: 27017
+  #     ME_CONFIG_MONGODB_SERVER: mongo
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: root
+  #     # ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/admin?authSource=admin&authMechanism=SCRAM-SHA-256
+  #   depends_on:
+  #     - mongo
+  #   links:
+  #     - mongo
+  #   networks:
+  #     - mongo-network
 
 networks: 
-  compose-network-bridge:
+  mongo-network:
     driver: bridge

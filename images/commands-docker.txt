@@ -1,0 +1,25 @@
+docker pull [name-image] -> baixar imagem
+
+docker build -t [name-image] -f [rename-image(opcional)] . -> baixar imagem dockerfile no diretorio do arquivo
+
+docker compose up -> baixar imagem docker-compose
+
+docker run -d -e [environment] -p [port:port] -v [directory:path] --rm --name [name-image] [name-container(optional)] -> executar imagem
+
+docker ps -> listar container
+
+docker container ls -> listar container
+
+docker images -> listar imagens
+
+docker image ls -> listar imagens
+
+docker volume ls -> listar volumes
+
+docker logs [name or id container] ls -> listar logs
+
+docker rm [name or id container] -> remover container
+
+docker rmi [name or id image] -> remover imagem
+
+docker rm volume [name volume] -> remover volume
